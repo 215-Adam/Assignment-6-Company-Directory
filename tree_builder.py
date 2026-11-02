@@ -7,8 +7,10 @@ class EmployeeNode:
         right (EmployeeNode): The right child node, representing the right subordinate.
     '''
 
-    # Delete this line and implement the class below
-    pass
+    def __init__(self, name):
+        self.name = name
+        self.left = None
+        self.right = None
 
 class TeamTree:
     '''
@@ -21,18 +23,71 @@ class TeamTree:
 
     '''
     
-    # Delete this line and implement the class below
-    pass
+    def __init__(self):
+        self.root = None
+
+    def insert(self, manager_name, employee_name, side, current_node=None):
+        # Only the first call starts with no node, so only it reports a missing manager
+        is_first_call = current_node is None
+
+        if is_first_call:
+            current_node = self.root
+
+        if current_node is None:
+            print("❌ The team has no lead yet. Add a team lead first.")
+            return False
+
+        side = side.lower()
+        if side != "left" and side != "right":
+            print(f"❌ Invalid side '{side}'. Please choose left or right.")
+            return False
+
+        if current_node.name == manager_name:
+            if side == "left" and current_node.left is None:
+                current_node.left = EmployeeNode(employee_name)
+            elif side == "right" and current_node.right is None:
+                current_node.right = EmployeeNode(employee_name)
+            else:
+                print(f"❌ The {side.upper()} side of {manager_name} is already taken.")
+                return True
+
+            print(f"✅ {employee_name} added to the {side.upper()} of {manager_name}")
+            return True
+
+        # Never recurse on an empty child: passing None would restart the search at the root
+        found = False
+        if current_node.left is not None:
+            found = self.insert(manager_name, employee_name, side, current_node.left)
+        if not found and current_node.right is not None:
+            found = self.insert(manager_name, employee_name, side, current_node.right)
+
+        if is_first_call and not found:
+            print(f"❌ Manager '{manager_name}' was not found.")
+
+        return found
+
+    def print_tree(self, node=None, level=0):
+        if node is None:
+            if level > 0:
+                return
+            node = self.root
+            if node is None:
+                print("The team is empty.")
+                return
+
+        print("  " * level + f"- {node.name}")
+        self.print_tree(node.left, level + 1)
+        self.print_tree(node.right, level + 1)
 
 # Test your code here
-
-
-
-
-
-
-
-
+if __name__ == "__main__":
+    company_directory_example = TeamTree()
+    company_directory_example.root = EmployeeNode("Jordan")
+    company_directory_example.insert("Jordan", "Taylor", "right")
+    company_directory_example.insert("Jordan", "Riley", "left")
+    company_directory_example.insert("Riley", "Dana", "right")
+    company_directory_example.insert("Riley", "Morgan", "left")
+    company_directory_example.print_tree()
 
 # CLI functionality
 def company_directory():
@@ -70,3 +125,7 @@ def company_directory():
             break
         else:
             print("❌ Invalid option. Try again.")
+
+
+if __name__ == "__main__":
+    company_directory()
